@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>test vue</title>
+</head>
+<body>
+  <div id="app">
+    <span>look the vue</span>
+    <my-functional-button1 @click="BtnHandler">
+        Click me
+    </my-functional-button1>
+  </div>
+  <script src="./js/vue.js"></script>
+  <script src="./js/functionalButton.js"></script>
+  <script>
+    let app = new Vue({
+      el: "#app",
+      data: {
+        msg: 'hello'
+      },
+      methods: {
+        BtnHandler () {
+          console.log('to click the btn')
+        }
+      }
+    })
+  </script>
+</body>
+</html>
