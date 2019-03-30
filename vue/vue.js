@@ -1998,7 +1998,16 @@
     }
   }
 
-  /*  */
+  /* 
+   nextTick 的实现原理
+  1.通过callbacks创建一个事件队列
+  2.通过 timerFunc创建一个异步函数， 该方法的实现采用兼容方案
+  以此为是否支持Promise 、MutationObserver、setImmediate、setTimeout
+  3.调用nextTick方法时， 将cb函数放入callbacks队列中，
+  此时如timerFunc方法处在执行中，则放入队列等待执行即可
+  若timerFunc为执行，则触发此方法
+   */
+  
 
   var isUsingMicroTask = false;
 
@@ -2225,6 +2234,7 @@
    * Recursively traverse an object to evoke all converted
    * getters, so that every nested property inside the object
    * is collected as a "deep" dependency.
+   * 深度依赖收集， 我们在设置watch监听数据变化时， 可设置deep来进行深层次的依赖收集工作
    */
   function traverse (val) {
     _traverse(val, seenObjects);
@@ -2289,7 +2299,8 @@
     invoker.fns = fns;
     return invoker
   }
-
+  
+  // 更新事件函数
   function updateListeners (
     on,
     oldOn,
@@ -2330,7 +2341,7 @@
   }
 
   /*  */
-
+  // merge钩子函数
   function mergeVNodeHook (def, hookKey, hook) {
     if (def instanceof VNode) {
       def = def.data.hook || (def.data.hook = {});
@@ -2365,7 +2376,7 @@
   }
 
   /*  */
-
+  // 获取propsData
   function extractPropsFromVNodeData (
     data,
     Ctor,
@@ -2446,6 +2457,7 @@
   // normalization is needed - if any child is an Array, we flatten the whole
   // thing with Array.prototype.concat. It is guaranteed to be only 1-level deep
   // because functional components already normalize their own children.
+  // 主要是对于函数式组件，应保证children的为一层
   function simpleNormalizeChildren (children) {
     for (var i = 0; i < children.length; i++) {
       if (Array.isArray(children[i])) {
@@ -2459,6 +2471,9 @@
   // e.g. <template>, <slot>, v-for, or when the children is provided by user
   // with hand-written render functions / JSX. In such cases a full normalization
   // is needed to cater to all possible types of children values.
+  // a.当手写children只有一个String节点时， 我们将其规范化为一个array
+  // b.  在使用<template>, <slot>, v-for或者手写render函数时，会出现嵌套数组的情况， 
+  // 这时我们需要将数组规范到一层
   function normalizeChildren (children) {
     return isPrimitive(children)
       ? [createTextVNode(children)]
@@ -2466,6 +2481,7 @@
         ? normalizeArrayChildren(children)
         : undefined
   }
+ 
 
   function isTextNode (node) {
     return isDef(node) && isDef(node.text) && isFalse(node.isComment)
@@ -2520,7 +2536,7 @@
   }
 
   /*  */
-
+   // 初始化provide属性
   function initProvide (vm) {
     var provide = vm.$options.provide;
     if (provide) {
@@ -2529,7 +2545,8 @@
         : provide;
     }
   }
-
+  
+  // 初始化inject
   function initInjections (vm) {
     var result = resolveInject(vm.$options.inject, vm);
     if (result) {
@@ -2550,7 +2567,8 @@
       toggleObserving(true);
     }
   }
-
+  
+  // 获取注入的值
   function resolveInject (inject, vm) {
     if (inject) {
       // inject is :any because flow is not smart enough to figure out cached
@@ -2593,6 +2611,7 @@
 
   /**
    * Runtime helper for resolving raw children VNodes into a slot object.
+   * 将组件对应的slot vnode挂载到slots属性上
    */
   function resolveSlots (
     children,
@@ -2633,13 +2652,15 @@
     }
     return slots
   }
-
+  
+  // 是否是空节点
   function isWhitespace (node) {
     return (node.isComment && !node.asyncFactory) || node.text === ' '
   }
 
   /*  */
-
+  // 规范化作用域插槽
+  // 在作用域插槽render时， 为期挂载相关渲染函数
   function normalizeScopedSlots (
     slots,
     normalSlots,
