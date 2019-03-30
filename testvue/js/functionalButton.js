@@ -1,5 +1,6 @@
 
 // 其中上下文中的data是对createElement方法中的属性进行了封装
+// 函数式组件对应的实现函数为FunctionalRenderContext 、createFunctionalComponent
 /* 
 <my-functional-button1 @click="BtnHandler">
         Click me

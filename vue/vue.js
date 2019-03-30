@@ -2784,6 +2784,8 @@
 
   /**
    * Runtime helper for rendering <slot>
+   * 如果是普通的slot vnode即为父元素中已经渲染vnode
+   * 如果是作用域slot则通过render函数进行vnode渲染
    */
   function renderSlot (
     name,
@@ -2862,6 +2864,7 @@
 
   /**
    * Runtime helper for merging v-bind="object" into a VNode's data.
+   * 将v-bind中的数据merge到vnode中
    */
   function bindObjectProps (
     data,
@@ -2917,6 +2920,7 @@
 
   /**
    * Runtime helper for rendering static trees.
+   * render静态节点， 对于静态节点进行缓存处理
    */
   function renderStatic (
     index,
@@ -2942,6 +2946,7 @@
   /**
    * Runtime helper for v-once.
    * Effectively it means marking the node as static with a unique key.
+   * 只进行一次渲染， 这也就意味着这意味它被当成静态节点来处理
    */
   function markOnce (
     tree,
@@ -3071,7 +3076,8 @@
   }
 
   /*  */
-
+  
+  // 函数式组件的实现
   function FunctionalRenderContext (
     data,
     props,
@@ -3212,15 +3218,10 @@
     }
   }
 
-  /*  */
 
-  /*  */
-
-  /*  */
-
-  /*  */
 
   // inline hooks to be invoked on component VNodes during patch
+  //组件vnode钩子函数
   var componentVNodeHooks = {
     init: function init (vnode, hydrating) {
       if (
@@ -3287,6 +3288,13 @@
 
   var hooksToMerge = Object.keys(componentVNodeHooks);
 
+  // 创建一个组件对象
+  /**
+   * baseCtor.extend创建一个继承Vue的子类
+   * 1.如果是异步组件会创建一个站位节点等异步组件加载完成后进行替换
+   * 2.如果是函数式组件则直接返回render后的vnode结果
+   * 3.普通组件则渲染成组件式vnode
+   */
   function createComponent (
     Ctor,
     data,
@@ -3315,6 +3323,7 @@
     }
 
     // async component
+    //对于异步组件会创建一个站位节点
     var asyncFactory;
     if (isUndef(Ctor.cid)) {
       asyncFactory = Ctor;
@@ -3386,6 +3395,7 @@
     return vnode
   }
 
+  // 对于组件实例化vm
   function createComponentInstanceForVnode (
     vnode, // we know it's MountedComponentVNode but flow doesn't
     parent // activeInstance in lifecycle state
@@ -3455,6 +3465,7 @@
 
   // wrapper function for providing a more flexible interface
   // without getting yelled at by flow
+  // 该方法进行vnode的生成， 在render方法中对其进行调用
   function createElement (
     context,
     tag,
@@ -3589,7 +3600,7 @@
   }
 
   /*  */
-
+  // 初始化渲染函数
   function initRender (vm) {
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
@@ -3723,6 +3734,7 @@
     return node
   }
 
+  // 异步函数方法的实现
   function resolveAsyncComponent (
     factory,
     baseCtor

@@ -9,14 +9,11 @@
 <body>
   <div id="app">
     <span>look the vue</span>
-    <current-user>
-      <span>inner text</span>
-    </current-user>
-    <current-scope v-slot:default="slotProps">
-      <span>{{slotProps.text}}</span>
-    </current-scope>
+    <div v-for="(item, index ) in fruit">
+      {{item}}
+    </div>
   </div>
   <script src="./js/vue.js"></script>
-  <script src="./js/scopeSlot.js"></script>
+  <script src="./js/renderLIst.js"></script>
 </body>
 </html>
