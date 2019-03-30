@@ -951,6 +951,7 @@
 
   /**
    * Intercept mutating methods and emit events
+   * 数据变化依赖收集中我们要对数组函数进行重写，实现数据更新
    */
   methodsToPatch.forEach(function (method) {
     // cache original method
@@ -997,6 +998,7 @@
    * object. Once attached, the observer converts the target
    * object's property keys into getter/setters that
    * collect dependencies and dispatch updates.
+   * Observer递归遍历数据 通过get/set实现依赖收集
    */
   var Observer = function Observer (value) {
     this.value = value;
@@ -1004,6 +1006,7 @@
     this.vmCount = 0;
     def(value, '__ob__', this);
     if (Array.isArray(value)) {
+      // 将 数组原型链上的属性挂载到变量上
       if (hasProto) {
         protoAugment(value, arrayMethods);
       } else {
@@ -1019,6 +1022,7 @@
    * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
+   * 遍历对象的key值进行getter/setters
    */
   Observer.prototype.walk = function walk (obj) {
     var keys = Object.keys(obj);
@@ -1029,6 +1033,7 @@
 
   /**
    * Observe a list of Array items.
+   * 对于数组元素实现Observe
    */
   Observer.prototype.observeArray = function observeArray (items) {
     for (var i = 0, l = items.length; i < l; i++) {
@@ -1051,6 +1056,7 @@
   /**
    * Augment a target Object or Array by defining
    * hidden properties.
+   * 为目标对象定义原型连上的属性
    */
   /* istanbul ignore next */
   function copyAugment (target, src, keys) {
@@ -1089,6 +1095,7 @@
 
   /**
    * Define a reactive property on an Object.
+   * 此处定义get set方法实现数据依赖收集以及变化更新
    */
   function defineReactive$$1 (
     obj,
@@ -1155,6 +1162,7 @@
    * Set a property on an object. Adds the new property and
    * triggers change notification if the property doesn't
    * already exist.
+   * 建立一个可挂载到Vue上的静态set或vm实例上的$set实现数据监听
    */
   function set (target, key, val) {
     if (isUndef(target) || isPrimitive(target)
@@ -1189,6 +1197,7 @@
 
   /**
    * Delete a property and trigger change if necessary.
+   * delete删除方法， 删除时触发数据更新
    */
   function del (target, key) {
     if (isUndef(target) || isPrimitive(target)
@@ -1220,6 +1229,7 @@
   /**
    * Collect dependencies on array elements when the array is touched, since
    * we cannot intercept array element access like property getters.
+   * 针对数组进行watcher的收集
    */
   function dependArray (value) {
     for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
@@ -1237,6 +1247,7 @@
    * Option overwriting strategies are functions that handle
    * how to merge a parent option value and a child option
    * value into the final value.
+   * strat主要是用来实现一些合并策略
    */
   var strats = config.optionMergeStrategies;
 
@@ -1481,6 +1492,7 @@
 
   /**
    * Validate component names
+   * 校验名称的合法性
    */
   function checkComponents (options) {
     for (var key in options.components) {
@@ -1506,6 +1518,8 @@
   /**
    * Ensure all props option syntax are normalized into the
    * Object-based format.
+   * 对props进行标准化， 我们在写props时可以采用数组的方式进行书写，
+   * 在实际处理中会对其进行标准化处理
    */
   function normalizeProps (options, vm) {
     var props = options.props;
@@ -1543,6 +1557,7 @@
 
   /**
    * Normalize all injections into Object-based format
+   * 与props类似，对inject也需要进行标准化处理
    */
   function normalizeInject (options, vm) {
     var inject = options.inject;
@@ -1570,6 +1585,8 @@
 
   /**
    * Normalize raw function directives into object format.
+   * 针对简写指令进行标准化， 
+   * 简写指令：在很多时候，你可能想在 bind 和 update 时触发相同行为，而不关心其它的钩子。
    */
   function normalizeDirectives (options) {
     var dirs = options.directives;
@@ -1596,6 +1613,7 @@
   /**
    * Merge two option objects into a new one.
    * Core utility used in both instantiation and inheritance.
+   * 对于混入或注入的一些方法指令属性，我们需要对其进行merge
    */
   function mergeOptions (
     parent,
@@ -1650,6 +1668,7 @@
    * Resolve an asset.
    * This function is used because child instances need access
    * to assets defined in its ancestor chain.
+   * 用来解析options中对应的属性
    */
   function resolveAsset (
     options,
@@ -1682,7 +1701,7 @@
   /*  */
 
 
-
+  // 验证props的合法性入口函数
   function validateProp (
     key,
     propOptions,
@@ -1757,6 +1776,7 @@
 
   /**
    * Assert whether a prop is valid.
+   * 判断一个具体的prop是否是符合规则的
    */
   function assertProp (
     prop,
@@ -1929,7 +1949,7 @@
       popTarget();
     }
   }
-
+  // 错误提示相关处理
   function invokeWithErrorHandling (
     handler,
     context,
