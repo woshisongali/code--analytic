@@ -3907,7 +3907,9 @@
     updateListeners(listeners, oldListeners || {}, add, remove$1, createOnceHandler, vm);
     target = undefined;
   }
-
+  
+  // vue事件的实现包括 $on、$once、$off、$emit
+  // 其采用方案为观察者模式
   function eventsMixin (Vue) {
     var hookRE = /^hook:/;
     Vue.prototype.$on = function (event, fn) {
