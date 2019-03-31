@@ -6735,7 +6735,11 @@
     }
   }
 
-  /*  */
+  /** 
+   * 6743 - 6862 指令的绑定
+   * 在_update 方法中会触发bind、update、inserted、unbind钩子函数
+  */
+ 
 
   var directives = {
     create: updateDirectives,
@@ -6814,6 +6818,7 @@
 
   var emptyModifiers = Object.create(null);
 
+  // 规范化指令对象
   function normalizeDirectives$1 (
     dirs,
     vm
@@ -6858,7 +6863,7 @@
   ];
 
   /*  */
-
+  // 更新DOM的attr相关属性
   function updateAttrs (oldVnode, vnode) {
     var opts = vnode.componentOptions;
     if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
@@ -6960,7 +6965,8 @@
   };
 
   /*  */
-
+  
+  // 更新class属性
   function updateClass (oldVnode, vnode) {
     var el = vnode.elm;
     var data = vnode.data;
@@ -7000,7 +7006,11 @@
   /*  */
 
   var validDivisionCharRE = /[\w).+\-_$\]]/;
-
+  
+  // filter函数的处理
+  /**
+   * 如示例{{ msg | upper }}  通过该方法调用返回 字符串"_f("upper")(msg)"
+   */
   function parseFilters (exp) {
     var inSingle = false;
     var inDouble = false;
@@ -7133,6 +7143,7 @@
     el.attrsList.push(rangeSetItem({ name: name, value: value }, range));
   }
 
+  // 添加指令对象
   function addDirective (
     el,
     name,
@@ -7242,7 +7253,8 @@
 
     el.plain = false;
   }
-
+ 
+  // 获取binding属性
   function getRawBindingAttr (
     el,
     name
@@ -7325,6 +7337,8 @@
   }
 
   /*  */
+
+  // code generationd的相关语法是对template模板进行解析 ， 生成用于render vnode的函数
 
   /**
    * Cross-platform code generation for component v-model
@@ -7480,7 +7494,8 @@
   // so we used some reserved tokens during compile.
   var RANGE_TOKEN = '__r';
   var CHECKBOX_RADIO_TOKEN = '__c';
-
+  
+  // 编译阶段对v-model进行相应的处理
   function model (
     el,
     dir,
@@ -7986,6 +8001,7 @@
     }
   });
 
+  // styley样式更新
   function updateStyle (oldVnode, vnode) {
     var data = vnode.data;
     var oldData = oldVnode.data;
@@ -9259,7 +9275,7 @@
   });
 
 
-
+// 9278 - 12030行代码主要生成compile函数
   function parseText (
     text,
     delimiters
@@ -12037,6 +12053,7 @@
   });
 
   var mount = Vue.prototype.$mount;
+  // 挂载方法
   Vue.prototype.$mount = function (
     el,
     hydrating
