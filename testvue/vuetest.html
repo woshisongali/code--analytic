@@ -12,14 +12,28 @@
     <!-- <div v-for="(item, index ) in fruit">
       {{item}}
     </div> -->
-    <ele>
+    <!-- <ele>
       <div>
         <Child></Child>
       </div>
-    </ele>
+    </ele> -->
+    <async-example></async-example>
   </div>
   <script src="./js/vue.js"></script>
-  <script src="./js/cloneVnode.js"></script>
-  <script src="./js/filter.js"></script>
+  <!-- <script src="./js/cloneVnode.js"></script> -->
+  <!-- <script src="./js/filter.js"></script> -->
+  <script>
+    Vue.component('async-example', function (resolve, reject) {
+      setTimeout(function () {
+        // 向 `resolve` 回调传递组件定义
+        resolve({
+          template: '<div>I am async!</div>'
+        })
+      }, 1000)
+    })
+    var app = new Vue({
+      el: '#app'
+    })
+  </script>
 </body>
 </html>
