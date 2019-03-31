@@ -6011,6 +6011,9 @@
 
     var modules = backend.modules;
     var nodeOps = backend.nodeOps;
+    
+    // 收集钩子函数
+    // const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
     for (i = 0; i < hooks.length; ++i) {
       cbs[hooks[i]] = [];
@@ -6034,7 +6037,7 @@
       remove$$1.listeners = listeners;
       return remove$$1
     }
-
+   
     function removeNode (el) {
       var parent = nodeOps.parentNode(el);
       // element may have already been removed due to v-html / v-text
@@ -6042,7 +6045,8 @@
         nodeOps.removeChild(parent, el);
       }
     }
-
+    
+    // 判断是否是一个未知元素
     function isUnknownElement$$1 (vnode, inVPre) {
       return (
         !inVPre &&
@@ -6060,7 +6064,8 @@
     }
 
     var creatingElmInVPre = 0;
-
+   
+    // 该方法实现节点的真正插入
     function createElm (
       vnode,
       insertedVnodeQueue,
@@ -6322,6 +6327,12 @@
       }
     }
 
+    /**
+     * 通过此方法实现diff
+     * 1.diff原则是最少更新，
+     * 2. 设置双指针队列，进行首尾比较 以实现最少更新
+     * 3. diff如果两个vnode相同则还会继续进行深度遍历的比较， 我们可以设置key为不同的值来进行剪枝
+     */
     function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
       var oldStartIdx = 0;
       var newStartIdx = 0;
@@ -6617,7 +6628,8 @@
         return node.nodeType === (vnode.isComment ? 8 : 3)
       }
     }
-
+   
+    // patch的入口函数
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
       if (isUndef(vnode)) {
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
