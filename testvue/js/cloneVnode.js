@@ -58,3 +58,8 @@ Vue.component('ele', {
     return createElement('div', [vNodes, clonedVNodes]);
   }
 });
+
+
+var app = new Vue({
+  el: '#app'
+})

@@ -4042,6 +4042,7 @@
     vm._isBeingDestroyed = false;
   }
 
+  // vue生命周期中混入的钩子函数 _update、$forceUpdate 、$destroy
   function lifecycleMixin (Vue) {
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
@@ -4125,6 +4126,12 @@
     };
   }
 
+  /**
+   * 组件挂载
+   * 1.在此方法中new 一个Watcher 用于组件模板中数据依赖的收集
+   * 2.此方法的过程中触发render方法进行vnode的渲染
+   * 触发update方法更新实际的DOM节点
+   */
   function mountComponent (
     vm,
     el,
@@ -4199,6 +4206,7 @@
     return vm
   }
 
+  // 往组件实例上绑定其对应的props listeners等属性
   function updateChildComponent (
     vm,
     propsData,
@@ -4285,7 +4293,8 @@
     }
     return false
   }
-
+ 
+  // 针对keep-alive组件的钩子函数
   function activateChildComponent (vm, direct) {
     if (direct) {
       vm._directInactive = false;
@@ -4320,6 +4329,7 @@
     }
   }
 
+  // 触发钩子函数
   function callHook (vm, hook) {
     // #7573 disable dep collection when invoking lifecycle hooks
     pushTarget();
@@ -4383,6 +4393,7 @@
 
   /**
    * Flush both queues and run the watchers.
+   * 一个用于存储watchers的队列，如下面所说的那样， 你需要保证它的优先级
    */
   function flushSchedulerQueue () {
     currentFlushTimestamp = getNow();
@@ -4442,7 +4453,8 @@
       devtools.emit('flush');
     }
   }
-
+ 
+  // 调用update钩子函数
   function callUpdatedHooks (queue) {
     var i = queue.length;
     while (i--) {
@@ -4476,6 +4488,7 @@
    * Push a watcher into the watcher queue.
    * Jobs with duplicate IDs will be skipped unless it's
    * pushed when the queue is being flushed.
+   * 对于已经在执行中的队列我们需要保证watcher入队的顺序
    */
   function queueWatcher (watcher) {
     var id = watcher.id;
@@ -4515,6 +4528,8 @@
    * A watcher parses an expression, collects dependencies,
    * and fires callback when the expression value changes.
    * This is used for both the $watch() api and directives.
+   * watcher类的实现
+   * expOrFn用于存储获取value值的表达式  在组件渲染的watcher中该属性为false
    */
   var Watcher = function Watcher (
     vm,
@@ -4569,6 +4584,7 @@
 
   /**
    * Evaluate the getter, and re-collect dependencies.
+   * 实现依赖收集
    */
   Watcher.prototype.get = function get () {
     pushTarget(this);
@@ -4610,6 +4626,8 @@
 
   /**
    * Clean up for dependency collection.
+   * 通过该函数将旧的已经与该watcher无关联的deps进行remove
+   * 例如当v-if模板不需要渲染时，它其中涉及到的数据不需要进行该watcher的订阅。
    */
   Watcher.prototype.cleanupDeps = function cleanupDeps () {
     var i = this.deps.length;
@@ -4686,6 +4704,7 @@
 
   /**
    * Depend on all deps collected by this watcher.
+   * dep订阅
    */
   Watcher.prototype.depend = function depend () {
     var i = this.deps.length;
@@ -4696,6 +4715,7 @@
 
   /**
    * Remove self from all dependencies' subscriber list.
+   * 取消订阅
    */
   Watcher.prototype.teardown = function teardown () {
     if (this.active) {
@@ -4722,6 +4742,7 @@
     set: noop
   };
 
+  // get set代理
   function proxy (target, sourceKey, key) {
     sharedPropertyDefinition.get = function proxyGetter () {
       return this[sourceKey][key]
@@ -4732,6 +4753,7 @@
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
 
+  // 初始化数据实现监听
   function initState (vm) {
     vm._watchers = [];
     var opts = vm.$options;
@@ -4747,7 +4769,9 @@
       initWatch(vm, opts.watch);
     }
   }
-
+ 
+  // 初始化props 通过proxy设置代理， 可直接访问props的值
+  // 在此方法中， 如果直接修改props的值的话会给出警告。 因为从原则上来说我们不应该去修改props中的值
   function initProps (vm, propsOptions) {
     var propsData = vm.$options.propsData || {};
     var props = vm._props = {};
@@ -4796,6 +4820,7 @@
     toggleObserving(true);
   }
 
+  // 初始化data数据observe方法设置get set
   function initData (vm) {
     var data = vm.$options.data;
     data = vm._data = typeof data === 'function'
@@ -4853,6 +4878,12 @@
 
   var computedWatcherOptions = { lazy: true };
 
+  /**
+   * 计算属性的实现
+   * 1.通过new Watcher 实例化一个watcher对象
+   * 2.通过defineComputed 绑定get set方法
+   * 3.在createComputedGetter 方法中调用 watcher.depend() 或者 watcher.evaluate() 来实现依赖收集
+   */
   function initComputed (vm, computed) {
     // $flow-disable-line
     var watchers = vm._computedWatchers = Object.create(null);
@@ -4945,6 +4976,7 @@
     }
   }
 
+  // 将method方法挂载到vm实例上
   function initMethods (vm, methods) {
     var props = vm.$options.props;
     for (var key in methods) {
@@ -4973,6 +5005,11 @@
     }
   }
 
+  /**
+   * 初始化 watch 
+   * 1.通过createWatcher来调用vm.$watch(expOrFn, handler, options)
+   * 2.new Watcher来实现依赖收集
+   */
   function initWatch (vm, watch) {
     for (var key in watch) {
       var handler = watch[key];
@@ -5057,6 +5094,11 @@
 
   var uid$3 = 0;
 
+  /**
+   * new 一个vue实例时的初始化方法
+   * 在该方法中执行事件数据等一系列的初始化方法
+   * 也是生命周期过程中钩子函数的触发入口
+   */
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
       var vm = this;
@@ -5133,6 +5175,7 @@
     }
   }
 
+
   function resolveConstructorOptions (Ctor) {
     var options = Ctor.options;
     if (Ctor.super) {
@@ -5186,6 +5229,9 @@
 
   /*  */
 
+  /**
+   * vue引入插件的方法
+   */
   function initUse (Vue) {
     Vue.use = function (plugin) {
       var installedPlugins = (this._installedPlugins || (this._installedPlugins = []));
@@ -5228,6 +5274,7 @@
 
     /**
      * Class inheritance
+     * 实现类的继承
      */
     Vue.extend = function (extendOptions) {
       extendOptions = extendOptions || {};
@@ -5359,6 +5406,8 @@
     return false
   }
 
+  // 对于缓存组件的相关处理
+  // 删除缓存
   function pruneCache (keepAliveInstance, filter) {
     var cache = keepAliveInstance.cache;
     var keys = keepAliveInstance.keys;
@@ -5390,6 +5439,10 @@
 
   var patternTypes = [String, RegExp, Array];
 
+  /**
+   * keep-alive组件的实现
+   * 在render函数中，第一次render的时候将vnode存入缓存， 此后从缓存中拿取相关数据
+   */
   var KeepAlive = {
     name: 'keep-alive',
     abstract: true,
@@ -5475,6 +5528,9 @@
 
   /*  */
 
+  /**
+   * 创建一些全局方法 如set、delete、 nextTick
+   */
   function initGlobalAPI (Vue) {
     // config
     var configDef = {};
@@ -5599,7 +5655,9 @@
   };
 
   /*  */
-
+ /**
+  * 对vnode中的class进行处理 包括将静态class与 :class进行合并
+  */
   function genClassForVnode (vnode) {
     var data = vnode.data;
     var parentNode = vnode;
@@ -5775,7 +5833,8 @@
   }
 
   /*  */
-
+  // 创建一个dom节点
+  // 5837 - 5970执行DOM的相关操作
   function createElement$1 (tagName, vnode) {
     var elm = document.createElement(tagName);
     if (tagName !== 'select') {
@@ -5907,6 +5966,7 @@
 
   var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
 
+  // 在进行diff时判断是否是相同的vnode
   function sameVnode (a, b) {
     return (
       a.key === b.key && (
@@ -5941,7 +6001,10 @@
     }
     return map
   }
-
+  
+  /**
+   *实现patch的函数
+   */
   function createPatchFunction (backend) {
     var i, j;
     var cbs = {};
