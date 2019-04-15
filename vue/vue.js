@@ -6479,6 +6479,7 @@
 
       var oldCh = oldVnode.children;
       var ch = vnode.children;
+      // 执行updateAttr,updateClass等方法进行相关属性的更新
       if (isDef(data) && isPatchable(vnode)) {
         for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode); }
         if (isDef(i = data.hook) && isDef(i = i.update)) { i(oldVnode, vnode); }

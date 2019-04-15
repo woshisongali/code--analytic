@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>test vue</title>
+</head>
+<body>
+  <div id="app">
+    <span>look the vue</span>
+    <span @click="countChg">click me</span>
+    <span>to see the count value {{theCount}}</span>
+    <!-- <async-example></async-example> -->
+  </div>
+  <script src="./js/vue.js"></script>
+  <script src="./js/vuex.js"></script>
+  <!-- <script src="./js/cloneVnode.js"></script> -->
+  <!-- <script src="./js/filter.js"></script> -->
+  <script>
+    Vue.use(Vuex)
+    Vue.component('async-example', function (resolve, reject) {
+      setTimeout(function () {
+        // 向 `resolve` 回调传递组件定义
+        resolve({
+          template: '<div>I am async!</div>'
+        })
+      }, 1000)
+    })
+    const store = new Vuex.Store({
+      state: {
+        count: 0
+      },
+      mutations: {
+        increment (state) {
+          state.count++
+        }
+      }
+    })
+    var app = new Vue({
+      el: '#app',
+      store,
+      computed: {
+        theCount () {
+          return this.$store.state.count
+        }
+      },
+      methods: {
+        countChg () {
+          console.log('click me')
+          this.$store.commit('increment')
+        }
+      }
+    })
+  </script>
+</body>
+</html>
