@@ -1126,7 +1126,7 @@
         var value = getter ? getter.call(obj) : val;
         if (Dep.target) {
           dep.depend();
-          if (childOb) {
+          if (childOb) { // 当前的value是一个object对象或者数组，其属性同样需要进行订阅
             childOb.dep.depend();
             if (Array.isArray(value)) {
               dependArray(value);
@@ -1520,6 +1520,17 @@
    * Object-based format.
    * 对props进行标准化， 我们在写props时可以采用数组的方式进行书写，
    * 在实际处理中会对其进行标准化处理
+   * props{
+   *  test1: 'sss',
+   *  test2: {
+   *   type: Number,
+   *   default: 0,
+  *    required: true,
+       validator: function (value) {
+          return value >= 0
+        }
+   *  }
+   * }
    */
   function normalizeProps (options, vm) {
     var props = options.props;
@@ -1558,6 +1569,13 @@
   /**
    * Normalize all injections into Object-based format
    * 与props类似，对inject也需要进行标准化处理
+   * 一般写法 inject: ['foo']
+   * inject: {
+        foo: {
+          from: 'bar',
+          default: 'foo'
+        }
+      }
    */
   function normalizeInject (options, vm) {
     var inject = options.inject;
@@ -1701,7 +1719,9 @@
   /*  */
 
 
-  // 验证props的合法性入口函数
+  /** 
+   * 验证props的合法性以及 对子组件中的prop进行设置， 该方法会在函数式组件以及更新子组件时进行调用
+   * */ 
   function validateProp (
     key,
     propOptions,
@@ -2376,7 +2396,7 @@
   }
 
   /*  */
-  // 获取propsData
+  // 抽取propsData
   function extractPropsFromVNodeData (
     data,
     Ctor,
@@ -2612,6 +2632,50 @@
   /**
    * Runtime helper for resolving raw children VNodes into a slot object.
    * 将组件对应的slot vnode挂载到slots属性上
+   * 
+   * 具名插槽通过v-slot来标记
+   * <div class="container">
+      <header>
+        <slot name="header"></slot>
+      </header>
+      <main>
+        <slot></slot>
+      </main>
+      <footer>
+        <slot name="footer"></slot>
+      </footer>
+    </div>
+    <base-layout>
+      <template v-slot:header>
+        <h1>Here might be a page title</h1>
+      </template>
+
+      <p>A paragraph for the main content.</p>
+      <p>And another one.</p>
+
+      <template v-slot:footer>
+        <p>Here's some contact info</p>
+      </template>
+    </base-layout>
+   * 
+   *
+   * 插槽作用域
+   * 在子元素上通过v-bind进行绑定
+   * <span>
+      <slot v-bind:user="user">
+        {{ user.lastName }}
+      </slot>
+    </span>
+    在父组件上通过 v-slot进行赋值
+    <current-user>
+      <template v-slot:default="slotProps">
+        {{ slotProps.user.firstName }}
+      </template>
+    </current-user>
+   */
+
+   /** 
+    * 将组件内的子节点挂载到它的slots属性上
    */
   function resolveSlots (
     children,
@@ -2658,9 +2722,14 @@
     return (node.isComment && !node.asyncFactory) || node.text === ' '
   }
 
-  /*  */
-  // 规范化作用域插槽
-  // 在作用域插槽render时， 为期挂载相关渲染函数
+  /** 
+   * 规范化作用域插槽
+   * 在作用域插槽render时， 为期挂载相关渲染函数
+   * 如非作用域插槽 返回的结果为
+   * result[default] = function () { return slots[default]}
+   * 
+   * 普通插槽通过 $slot获取， 作用域插槽通过$scopedSlots获取
+   * */ 
   function normalizeScopedSlots (
     slots,
     normalSlots,
@@ -3463,9 +3532,55 @@
   var SIMPLE_NORMALIZE = 1;
   var ALWAYS_NORMALIZE = 2;
 
-  // wrapper function for providing a more flexible interface
-  // without getting yelled at by flow
-  // 该方法进行vnode的生成， 在render方法中对其进行调用
+  /** 
+   * wrapper function for providing a more flexible interface
+   * without getting yelled at by flow
+   * 该方法进行vnode的生成， 在render方法中对其进行调用
+   * createElement(
+      'anchored-heading', {
+        props: {
+          level: 1
+        }
+      }, [
+        createElement('span', 'Hello'),
+        ' world!'
+      ]
+    )
+
+    smart-list 组件的例子，它能根据传入 prop 的值来代为渲染更具体的组件：
+    var EmptyList = {}
+    var TableList = { }
+    var OrderedList = {  }
+    var UnorderedList = {  }
+
+    Vue.component('smart-list', {
+      functional: true,
+      props: {
+        items: {
+          type: Array,
+          required: true
+        },
+        isOrdered: Boolean
+      },
+      render: function (createElement, context) {
+        function appropriateListComponent () {
+          var items = context.props.items
+
+          if (items.length === 0)           return EmptyList
+          if (typeof items[0] === 'object') return TableList
+          if (context.props.isOrdered)      return OrderedList
+
+          return UnorderedList
+        }
+
+        return createElement(
+          appropriateListComponent(),
+          context.data,
+          context.children
+        )
+      }
+    })
+  */
   function createElement (
     context,
     tag,
@@ -4770,8 +4885,13 @@
     }
   }
  
-  // 初始化props 通过proxy设置代理， 可直接访问props的值
-  // 在此方法中， 如果直接修改props的值的话会给出警告。 因为从原则上来说我们不应该去修改props中的值
+  /** 
+   * 初始化props 通过proxy设置代理， 可直接访问props的值
+   * 在此方法中， 如果直接修改props的值的话会给出警告。 因为从原则上来说我们不应该去修改props中的值
+   * 父组件数据更新后， 怎样通知到子组件的？
+   * 在updateChildComponent方法中会对子组件的prop进行处理， 将父组件中的数值赋值的对应的子组件属性上
+  */
+
   function initProps (vm, propsOptions) {
     var propsData = vm.$options.propsData || {};
     var props = vm._props = {};

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>test vue</title>
+</head>
+<body>
+    <div id="app"></div>
+  <script src="./vue.js"></script>
+  <script>
+    // 非作用域插槽
+    /*
+    Vue.component('submit-button', {
+      data() {
+        return {
+          msg: 'ali'
+        }
+      },
+      render(create) {
+        return create('button', { attrs: {type: 'submit'}}, [
+          this.$slots.default
+        ]);
+      }
+    });
+    new Vue({
+      el: '#app',
+      data: {
+        msg: 'hello'
+      }, 
+      render(h) {
+        return h('submit-button',[
+          h('p', 'look me')
+        ]);
+      }
+    }); */
+    
+    // 作用域插槽
+    Vue.component('submit-button', {
+      data() {
+        return {
+          msg: 'ali'
+        }
+      },
+      render(create, context) {
+        console.log(this.$scopedSlots)
+        return create('span', {
+           attrs: {type: 'submit'},
+           props: {text: 'lll'},
+           scopedSlots: {
+            default: (props) => {
+              return create('em', props.text)
+            }
+           }
+          }, [
+          create('span', 'song'),
+          this.$scopedSlots.default(this.props)
+        ]);
+      }
+    });
+    new Vue({
+      el: '#app',
+      data: {
+        msg: 'hello'
+      }, 
+      render(h) {
+        return h('submit-button',[
+          h('p', 'look me')
+        ]);
+      }
+    });
+  </script>
+</body>
+</html>
