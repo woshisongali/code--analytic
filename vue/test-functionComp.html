@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>test function</title>
+</head>
+<body>
+  
+  <div id="app"></div>
+  <script src="./vue.js"></script>
+  <script>
+    Vue.component('my-functional-button', { 
+      functional: true,
+      render: function (c,context) {
+        return c('button', context.data, context.children)
+      }
+    })
+
+    new Vue({
+      el: '#app',
+      data: {
+        msg: 'hello'
+      }, 
+      render(h) {
+        with(this){return _c('my-functional-button',[[_v("\n          first\n      ")]],2)}
+      }
+    });
+
+
+    // let result = Vue.compile(`
+    //   <button
+    //     class="btn btn-primary"
+    //     v-bind="data.attrs"
+    //     v-on="listeners"
+    //   >
+    //     <slot/>
+    //   </button>
+    // `);
+
+    // let result = Vue.compile(`
+    // <my-functional-component>
+    //   <template>
+    //       first
+    //   </template>
+    // </my-functional-component>
+    // `);
+  </script>
+</body>
+</html>

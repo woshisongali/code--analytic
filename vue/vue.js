@@ -3522,6 +3522,11 @@
 
   // transform component v-model info (value and callback) into
   // prop and event handler respectively.
+  /** 
+   *  v-model 默认会利用名为 value 的 prop 和名为 input 的事件，
+   * <input v-model="msg" >
+   * <input :value="msg" @input="msg = $event.target.value" >
+  */
   function transformModel (options, data) {
     var prop = (options.model && options.model.prop) || 'value';
     var event = (options.model && options.model.event) || 'input'
@@ -3550,6 +3555,7 @@
   /** 
    * wrapper function for providing a more flexible interface
    * without getting yelled at by flow
+   * createElement
    * 该方法进行vnode的生成， 在render方法中对其进行调用
    * createElement(
       'anchored-heading', {
@@ -4714,7 +4720,7 @@
 
   /**
    * Evaluate the getter, and re-collect dependencies.
-   * 实现依赖收集
+   * getter求值， 实现依赖收集
    */
   Watcher.prototype.get = function get () {
     pushTarget(this);
@@ -6466,7 +6472,7 @@
      * 通过此方法实现diff
      * 1.diff原则是最少更新，
      * 2. 设置双指针队列，进行首尾比较 以实现最少更新
-     * 3. diff如果两个vnode相同则还会继续进行深度遍历的比较， 我们可以设置key为不同的值来进行剪枝
+     * 3. diff如果两个vnode相同则还会继续进行深度遍历的比较， 我们可以设置key为不同的值来快速找到对应的元素，提升性能
      */
     function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
       var oldStartIdx = 0;
@@ -6872,7 +6878,7 @@
   }
 
   /** 
-   * 6743 - 6862 指令的绑定
+   * 6881 指令的绑定
    * 在_update 方法中会触发bind、update、inserted、unbind钩子函数
   */
  
@@ -7145,7 +7151,21 @@
   
   // filter函数的处理
   /**
+   * new Vue({    
+        el:'#app',
+        data(){        
+            return {            
+                msg: 'hello'
+            }
+        },    
+        filters:{
+            upper(val) {
+              return val.toUpperCase();
+            }
+        }
+    })
    * 如示例{{ msg | upper }}  通过该方法调用返回 字符串"_f("upper")(msg)"
+   * 
    */
   function parseFilters (exp) {
     var inSingle = false;
@@ -8250,7 +8270,10 @@
     }
   }
 
-  /*  */
+  /** 
+   * 动画方面
+   * 
+  */
 
   function resolveTransition (def$$1) {
     if (!def$$1) {
@@ -8286,7 +8309,7 @@
 
   // Transition property/event sniffing
   var transitionProp = 'transition';
-  var transitionEndEvent = 'transitionend';
+  var transitionEndEvent = 'transitionend'; // 元素动画完成之后的回调函数
   var animationProp = 'animation';
   var animationEndEvent = 'animationend';
   if (hasTransition) {
@@ -8332,7 +8355,8 @@
     }
     removeClass(el, cls);
   }
-
+  
+  // transition动画结束所需要处理的回调函数
   function whenTransitionEnds (
     el,
     expectedType,
@@ -8435,7 +8459,12 @@
     return Number(s.slice(0, -1).replace(',', '.')) * 1000
   }
 
-  /*  */
+  /** 
+   * 动画进入的过程
+   * 1. 添加startClass、activeClass类
+   * 2.在nextTick 移除startClass类
+   * 3.在动画结束后移除 activeClass ,  动画结束最终是通过浏览量原生的transitionend钩子函数
+  */
 
   function enter (vnode, toggleDisplay) {
     var el = vnode.elm;
@@ -9051,6 +9080,10 @@
 
   var isVShowDirective = function (d) { return d.name === 'show'; };
 
+  /** 
+   * transition组件
+   * 主要做的事情是将一些 动画的属性或者钩子函数挂载到child的data上
+  */
   var Transition = {
     name: 'transition',
     props: transitionProps,
