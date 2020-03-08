@@ -34,28 +34,20 @@
         ]);
       }
     }); */
-    
+
     // 作用域插槽
-    Vue.component('submit-button', {
+    Vue.component('current-user', {
       data() {
         return {
-          msg: 'ali'
+          msg: 'helo',
+          user: {
+            lastName: 'yun',
+            firstName: 'jingfeng'
+          }
         }
       },
-      render(create, context) {
-        console.log(this.$scopedSlots)
-        return create('span', {
-           attrs: {type: 'submit'},
-           props: {text: 'lll'},
-           scopedSlots: {
-            default: (props) => {
-              return create('em', props.text)
-            }
-           }
-          }, [
-          create('span', 'song'),
-          this.$scopedSlots.default(this.props)
-        ]);
+      render() {
+        with(this){return _c('span',[_t("default",[_v("\n        "+_s(user.lastName)+"\n      ")],{"user":user})],2)}
       }
     });
     new Vue({
@@ -63,12 +55,25 @@
       data: {
         msg: 'hello'
       }, 
-      render(h) {
-        return h('submit-button',[
-          h('p', 'look me')
-        ]);
+      render() {
+        with(this){return _c('current-user',{scopedSlots:_u([{key:"default",fn:function(slotProps){return [_v("\n        "+_s(slotProps.user.firstName)+"\n      ")]}}])})}
       }
     });
+
+
+  //  let result =  Vue.compile(`<current-user>
+  //     <template v-slot:default="slotProps">
+  //       {{ slotProps.user.firstName }}
+  //     </template>
+  //   </current-user>`)
+  //   console.log(result);
+
+  //  let result =  Vue.compile(`<span>
+  //     <slot v-bind:user="user">
+  //       {{ user.lastName }}
+  //     </slot>
+  //   </span>`)
+  //   console.log(result);
   </script>
 </body>
 </html>

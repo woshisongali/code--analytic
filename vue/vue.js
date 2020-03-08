@@ -2676,6 +2676,21 @@
 
    /** 
     * 将组件内的子节点挂载到它的slots属性上
+    * 如上述示例 
+    * 1. 父组件 template模块会被解析成
+    * scopedSlots: _u([{
+    *   key: "default",
+    *   fn: function(slotProps) {
+    *    return [slotProps.user.firstName]
+    * }
+    * }])
+    * 2. a. 子组件scopedSlots: {
+    *   default: function(slotProps) {
+      *    return [slotProps.user.firstName]
+      * }
+    * }
+    *    b.子组件slot对应元素会被解析成 createElement('default', null, {user: user})
+    * 
    */
   function resolveSlots (
     children,
