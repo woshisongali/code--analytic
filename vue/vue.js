@@ -9083,6 +9083,7 @@
   /** 
    * transition组件
    * 主要做的事情是将一些 动画的属性或者钩子函数挂载到child的data上
+   * 会将created、 active钩子函数合并到data上
   */
   var Transition = {
     name: 'transition',
