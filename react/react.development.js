@@ -21,6 +21,7 @@ var ReactVersion = '16.8.2';
 
 // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
+// symbol方法枚举type值的时候可以保持其唯一性， 避免冲突
 var hasSymbol = typeof Symbol === 'function' && Symbol.for;
 
 var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;

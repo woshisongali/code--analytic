@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test scheduler</title>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="../react.development.js"></script>
+    <script src="../react-dom.development.js"></script>
+    <script>
+
+        let Scheduler = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.Scheduler
+        let NormalPriority = Scheduler.unstable_NormalPriority;
+        let scheduleCallback = Scheduler.unstable_scheduleCallback;
+        let cancelCallback = Scheduler.unstable_cancelCallback;
+        function test1() {
+            scheduleCallback(() => {
+                console.log('print A')
+            });
+            scheduleCallback(() => {
+                console.log('print B')
+            });
+            scheduleCallback(() => {
+                console.log('print C')
+            });
+            console.log('sync print lalala')
+        }
+        function test2() {
+            scheduleCallback(() => {
+                console.log('print A')
+            });
+            let cancelHandleB = scheduleCallback(() => {
+                console.log('print B')
+            });
+            scheduleCallback(() => {
+                console.log('print C')
+            });
+            cancelCallback(cancelHandleB);
+            console.log('sync print lalala')
+        }
+        // test1();
+        test2();
+    </script>
+</body>
+</html>
